@@ -20,12 +20,12 @@ public class CategoriesController {
     }
 
     @PostMapping
-    public ResponseEntity<?> saveCategory() { //@RequestBody ProductDto productDto
+    public ResponseEntity<?> saveCategory() { //@RequestBody CategoryDto categoryDto
         return null;
     }
 
     @PutMapping
-    public ResponseEntity<?> updateCategory() { //@RequestBody ProductDto productDto
+    public ResponseEntity<?> updateCategory() { //@RequestBody CategoryDto categoryDto
         return null;
     }
 
