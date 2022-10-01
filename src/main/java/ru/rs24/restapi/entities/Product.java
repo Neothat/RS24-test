@@ -1,6 +1,7 @@
 package ru.rs24.restapi.entities;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -9,6 +10,7 @@ import javax.persistence.*;
 @Table(name = "products")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Product {
 
     @Id
@@ -37,4 +39,14 @@ public class Product {
 
     @Column(name = "status")
     private Boolean status;
+
+    public Product(String name, String description, Integer price, String image, Category category, Long dateAdded, Boolean status) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.image = image;
+        this.category = category;
+        this.dateAdded = dateAdded;
+        this.status = status;
+    }
 }

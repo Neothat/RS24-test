@@ -30,6 +30,11 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
+    public Optional<Category> getCategoryByName(String name) {
+        return categoriesRepository.findByName(name);
+    }
+
+    @Override
     public Optional<Category> saveCategory(String name, String shortDescription) {
         if (categoriesRepository.findByName(name).isEmpty()) {
             Category newCategory = new Category(name, shortDescription);
