@@ -11,4 +11,10 @@ public class CategoryDto {
     private long id;
     private String name;
     private String shortDescription;
+
+    public CategoryDto(String name, String shortDescription) {
+        this.name = name;
+        this.shortDescription = shortDescription;
+    }
+
 }
