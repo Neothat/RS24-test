@@ -11,6 +11,8 @@ public interface CategoriesService {
 
     Optional<Category> getCategoryById(Long id);
 
+    Optional<Category> getCategoryByName(String name);
+
     Optional<Category> saveCategory(String name, String shortDescription);
 
     Optional<Category> updateCategory(CategoryDto categoryDto);
