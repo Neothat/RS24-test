@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.rs24.restapi.entities.Category;
 import ru.rs24.restapi.entities.Product;
+import ru.rs24.restapi.exceptions.ResourceNotFoundException;
 import ru.rs24.restapi.mappers.dtos.ProductDto;
 import ru.rs24.restapi.repositories.ProductsRepository;
 import ru.rs24.restapi.services.CategoriesService;
 import ru.rs24.restapi.services.ProductsService;
 
-import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -29,20 +29,25 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public List<Product> getAllProducts() {
-        return productsRepository.findAll();
+        return getProductsRepository().findAll();
     }
 
     @Override
     public Optional<Product> getProductById(Long id) {
-        return productsRepository.findById(id);
+        return getProductsRepository().findById(id);
+    }
+
+    @Override
+    public List<Product> getProductsByCategory(Category category) {
+        return getProductsRepository().findByCategory(category);
     }
 
     @Override
     public Optional<Product> saveProduct(Product product) {
         String productName = product.getName();
-        if (productName != null && !productName.isBlank() && productsRepository.findByName(productName).isEmpty() && product.getCategory() != null) {
+        if (productName != null && !productName.isBlank() && getProductsRepository().findByName(productName).isEmpty() && product.getCategory() != null) {
             log.info("Created a new product named \"{}\"", productName);
-            return Optional.of(productsRepository.save(product));
+            return Optional.of(getProductsRepository().save(product));
         }
         log.warn("Saving product named \"{}\" aborted", productName);
         return Optional.empty();
@@ -52,8 +57,8 @@ public class ProductsServiceImpl implements ProductsService {
     @Transactional
     public Optional<Product> updateProduct(ProductDto productDto) {
         Optional<Product> productOptional = getProductById(productDto.getId());
-        Category category = categoriesService.getCategoryByName(productDto.getCategory())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found, name: " + productDto.getCategory()));
+        Category category = getCategoriesService().getCategoryByName(productDto.getCategory())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found, name: " + productDto.getCategory()));
         String productDtoName = productDto.getName();
         if (productDtoName != null && !productDtoName.isBlank() && productOptional.isPresent() && category != null) {
             Product product = productOptional.get();
@@ -63,6 +68,7 @@ public class ProductsServiceImpl implements ProductsService {
             product.setImage(productDto.getImage());
             product.setCategory(category);
             product.setStatus(productDto.isStatus());
+            getProductsRepository().save(product);
             log.info("Changes made to the product with id \"{}\"", productDto.getId());
             return Optional.of(product);
         }
@@ -72,6 +78,6 @@ public class ProductsServiceImpl implements ProductsService {
 
     @Override
     public void deleteProductById(Long id) {
-        productsRepository.deleteById(id);
+        getProductsRepository().deleteById(id);
     }
 }

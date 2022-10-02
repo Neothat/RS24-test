@@ -1,7 +1,9 @@
 package ru.rs24.restapi.services.impl;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.rs24.restapi.entities.Category;
 import ru.rs24.restapi.mappers.dtos.CategoryDto;
@@ -11,35 +13,37 @@ import ru.rs24.restapi.services.CategoriesService;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@Getter
 public class CategoriesServiceImpl implements CategoriesService {
 
-    private final CategoriesRepository categoriesRepository;
+    @Setter(onMethod = @__(@Autowired))
+    private CategoriesRepository categoriesRepository;
+    @Setter(onMethod = @__(@Autowired))
+    private ProductsServiceImpl productsService;
 
     @Override
     public List<Category> getAllCategories() {
-        return categoriesRepository.findAll();
+        return getCategoriesRepository().findAll();
     }
 
     @Override
     public Optional<Category> getCategoryById(Long id) {
-        return categoriesRepository.findById(id);
+        return getCategoriesRepository().findById(id);
     }
 
     @Override
     public Optional<Category> getCategoryByName(String name) {
-        return categoriesRepository.findByName(name);
+        return getCategoriesRepository().findByName(name);
     }
 
     @Override
     public Optional<Category> saveCategory(String name, String shortDescription) {
-        if (name != null && !name.isBlank() && categoriesRepository.findByName(name).isEmpty()) {
+        if (name != null && !name.isBlank() && getCategoriesRepository().findByName(name).isEmpty()) {
             Category newCategory = new Category(name, shortDescription);
-            newCategory = categoriesRepository.save(newCategory);
+            newCategory = getCategoriesRepository().save(newCategory);
             log.info("Created and saved a new category named \"{}\"", name);
             return Optional.of(newCategory);
         }
@@ -56,7 +60,7 @@ public class CategoriesServiceImpl implements CategoriesService {
             Category category = categoryOptional.get();
             category.setName(categoryDtoName);
             category.setShortDescription(categoryDto.getShortDescription());
-            categoriesRepository.save(category);
+            getCategoriesRepository().save(category);
             log.info("Changes made to the category with id \"{}\"", category.getId());
             return Optional.of(category);
         }
@@ -65,7 +69,21 @@ public class CategoriesServiceImpl implements CategoriesService {
     }
 
     @Override
+    @Transactional
     public void deleteCategoryById(Long id) {
-        categoriesRepository.deleteById(id);
+        Optional<Category> categoryOptional = getCategoryById(id);
+        if (categoryOptional.isPresent()) {
+            unlinkCategoryFromProducts(categoryOptional.get());
+            getCategoriesRepository().deleteById(id);
+            log.info("Category with id: {} removed", id);
+        }
+    }
+
+    private void unlinkCategoryFromProducts(Category category) {
+        getProductsService().getProductsByCategory(category).forEach(product -> {
+            product.setCategory(null);
+            product.setStatus(Boolean.FALSE);
+            log.info("Product \"{}\" without category, product is no longer active", product.getName());
+        });
     }
 }

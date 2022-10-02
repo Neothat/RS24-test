@@ -3,7 +3,6 @@ package ru.rs24.restapi.mappers.dtos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.rs24.restapi.entities.Category;
 
 import javax.validation.constraints.NotEmpty;
 
