@@ -4,12 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import ru.rs24.restapi.entities.Category;
 import ru.rs24.restapi.entities.Product;
 import ru.rs24.restapi.exceptions.ResourceNotFoundException;
 import ru.rs24.restapi.mappers.dtos.ProductDto;
 import ru.rs24.restapi.repositories.ProductsRepository;
+import ru.rs24.restapi.repositories.specifications.ProductsSpecifications;
 import ru.rs24.restapi.services.CategoriesService;
 import ru.rs24.restapi.services.ProductsService;
 
@@ -28,8 +30,25 @@ public class ProductsServiceImpl implements ProductsService {
     private CategoriesService categoriesService;
 
     @Override
-    public List<Product> getAllProducts() {
-        return getProductsRepository().findAll();
+    public List<Product> getAllProducts(String category, String namePart, Integer minPrice, Integer maxPrice) {
+        Specification<Product> spec = Specification.where(null);
+
+        if (category != null) {
+            Optional<Category> categoryOptional = getCategoriesService().getCategoryByName(category);
+            if (categoryOptional.isPresent()) {
+                spec = spec.and(ProductsSpecifications.categoryEquals(categoryOptional.get()));
+            }
+        }
+        if (namePart != null) {
+            spec = spec.and(ProductsSpecifications.nameLike(namePart));
+        }
+        if (minPrice != null) {
+            spec = spec.and(ProductsSpecifications.priceGreaterOrEqualsThan(minPrice));
+        }
+        if (maxPrice != null) {
+            spec = spec.and(ProductsSpecifications.priceLessThanOrEqualsThan(maxPrice));
+        }
+        return getProductsRepository().findAll(spec);
     }
 
     @Override
@@ -46,6 +65,7 @@ public class ProductsServiceImpl implements ProductsService {
     public Optional<Product> saveProduct(Product product) {
         String productName = product.getName();
         if (productName != null && !productName.isBlank() && getProductsRepository().findByName(productName).isEmpty() && product.getCategory() != null) {
+            product.setDateAdded(System.currentTimeMillis());
             log.info("Created a new product named \"{}\"", productName);
             return Optional.of(getProductsRepository().save(product));
         }
