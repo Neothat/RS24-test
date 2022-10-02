@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.rs24.restapi.entities.Category;
+import ru.rs24.restapi.exceptions.ResourceAlreadyExistsException;
 import ru.rs24.restapi.exceptions.ResourceNotFoundException;
 import ru.rs24.restapi.mappers.CategoryMapper;
 import ru.rs24.restapi.mappers.dtos.CategoryDto;
@@ -44,7 +45,7 @@ public class CategoriesController {
     @PostMapping
     public ResponseEntity<CategoryDto> saveCategory(@Valid @RequestBody CategoryDto categoryDto) {
         Category category = getCategoriesService().saveCategory(categoryDto.getName(), categoryDto.getShortDescription())
-                .orElseThrow(() -> new ResourceNotFoundException("Category already exist " + categoryDto.getName()));
+                .orElseThrow(() -> new ResourceAlreadyExistsException("Category already exist " + categoryDto.getName()));
         return new ResponseEntity<>(CategoryMapper.INSTANCE.toDto(category), HttpStatus.CREATED);
     }
 

@@ -38,17 +38,14 @@ public class ProductsServiceImpl implements ProductsService {
     }
 
     @Override
-    public Optional<Category> getCategoryProductBy(Long id) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void saveProduct(String name, String description, Integer price, String image, Category category, Boolean status) {
-        if (productsRepository.findByName(name).isEmpty() && category != null) {
-            Product product = new Product(name, description, price, image, category, System.currentTimeMillis(), status);
-            productsRepository.save(product);
-            log.info("Created a new product named \"{}\"", name);
+    public Optional<Product> saveProduct(Product product) {
+        String productName = product.getName();
+        if (productName != null && !productName.isBlank() && productsRepository.findByName(productName).isEmpty() && product.getCategory() != null) {
+            log.info("Created a new product named \"{}\"", productName);
+            return Optional.of(productsRepository.save(product));
         }
+        log.warn("Saving product named \"{}\" aborted", productName);
+        return Optional.empty();
     }
 
     @Override
@@ -57,9 +54,10 @@ public class ProductsServiceImpl implements ProductsService {
         Optional<Product> productOptional = getProductById(productDto.getId());
         Category category = categoriesService.getCategoryByName(productDto.getCategory())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found, name: " + productDto.getCategory()));
-        if (productOptional.isPresent() && category != null) {
+        String productDtoName = productDto.getName();
+        if (productDtoName != null && !productDtoName.isBlank() && productOptional.isPresent() && category != null) {
             Product product = productOptional.get();
-            product.setName(productDto.getName());
+            product.setName(productDtoName);
             product.setDescription(productDto.getDescription());
             product.setPrice(productDto.getPrice());
             product.setImage(productDto.getImage());
@@ -68,19 +66,12 @@ public class ProductsServiceImpl implements ProductsService {
             log.info("Changes made to the product with id \"{}\"", productDto.getId());
             return Optional.of(product);
         }
+        log.warn("Update category with id \"{}\" aborted", productDto.getId());
         return Optional.empty();
     }
 
     @Override
     public void deleteProductById(Long id) {
         productsRepository.deleteById(id);
-    }
-
-    @Override
-    public Optional<Product> saveProduct(Product product) {
-        if (productsRepository.findByName(product.getName()).isEmpty() && product.getCategory() != null) {
-            return Optional.of(productsRepository.save(product));
-        }
-        return Optional.empty();
     }
 }

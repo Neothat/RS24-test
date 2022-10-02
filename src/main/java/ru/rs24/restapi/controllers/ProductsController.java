@@ -8,12 +8,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.rs24.restapi.entities.Category;
 import ru.rs24.restapi.entities.Product;
+import ru.rs24.restapi.exceptions.ResourceAlreadyExistsException;
+import ru.rs24.restapi.exceptions.ResourceNotFoundException;
 import ru.rs24.restapi.mappers.ProductMapper;
 import ru.rs24.restapi.mappers.dtos.ProductDto;
 import ru.rs24.restapi.services.CategoriesService;
 import ru.rs24.restapi.services.ProductsService;
 
 import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,25 +40,25 @@ public class ProductsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable Long id) {
-        Product product = getProductsService().getProductById(id).orElseThrow(() -> new EntityNotFoundException("Product not found, id: " + id));
+        Product product = getProductsService().getProductById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found, id: " + id));
         return new ResponseEntity<>(ProductMapper.INSTANCE.toDto(product), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<ProductDto> saveProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> saveProduct(@Valid @RequestBody ProductDto productDto) {
         Category category = getCategoriesService().getCategoryByName(productDto.getCategory())
-                .orElseThrow(() -> new EntityNotFoundException("Category not found, name: " + productDto.getName()));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found, name: " + productDto.getName()));
         Product draftProduct = ProductMapper.INSTANCE.toObject(productDto);
         draftProduct.setCategory(category);
         Product product = getProductsService().saveProduct(draftProduct)
-                .orElseThrow(() -> new EntityNotFoundException("Product already exist " + productDto.getName()));
+                .orElseThrow(() -> new ResourceAlreadyExistsException("Product already exist " + productDto.getName()));
         return new ResponseEntity<>(ProductMapper.INSTANCE.toDto(product), HttpStatus.CREATED);
     }
 
     @PutMapping
-    public ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> updateProduct(@Valid @RequestBody ProductDto productDto) {
         Product product = getProductsService().updateProduct(productDto)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found, id: " + productDto.getId()));
+                .orElseThrow(() -> new ResourceAlreadyExistsException("Product not found, id: " + productDto.getId()));
         return new ResponseEntity<>(ProductMapper.INSTANCE.toDto(product), HttpStatus.OK);
     }
 
