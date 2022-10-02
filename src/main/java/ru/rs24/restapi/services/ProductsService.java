@@ -12,13 +12,9 @@ public interface ProductsService {
 
     Optional<Product> getProductById(Long id);
 
-    Optional<Category> getCategoryProductBy(Long id);
-
-    void saveProduct(String name, String description, Integer price, String image, Category category, Boolean status);
+    Optional<Product> saveProduct(Product product);
 
     Optional<Product> updateProduct(ProductDto productDto);
 
     void deleteProductById(Long id);
-
-    Optional<Product> saveProduct(Product product);
 }

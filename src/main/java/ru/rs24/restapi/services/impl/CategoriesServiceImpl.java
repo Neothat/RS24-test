@@ -11,6 +11,7 @@ import ru.rs24.restapi.services.CategoriesService;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -36,12 +37,13 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     @Override
     public Optional<Category> saveCategory(String name, String shortDescription) {
-        if (categoriesRepository.findByName(name).isEmpty()) {
+        if (name != null && !name.isBlank() && categoriesRepository.findByName(name).isEmpty()) {
             Category newCategory = new Category(name, shortDescription);
             newCategory = categoriesRepository.save(newCategory);
-            log.info("Created a new category named \"{}\"", name);
+            log.info("Created and saved a new category named \"{}\"", name);
             return Optional.of(newCategory);
         }
+        log.warn("Saving category named \"{}\" aborted", name);
         return Optional.empty();
     }
 
@@ -49,14 +51,16 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Transactional
     public Optional<Category> updateCategory(CategoryDto categoryDto) {
         Optional<Category> categoryOptional = getCategoryById(categoryDto.getId());
-        if (categoryOptional.isPresent()) {
+        String categoryDtoName = categoryDto.getName();
+        if (categoryDtoName != null && !categoryDtoName.isBlank() && categoryOptional.isPresent()) {
             Category category = categoryOptional.get();
-            category.setName(categoryDto.getName());
+            category.setName(categoryDtoName);
             category.setShortDescription(categoryDto.getShortDescription());
             categoriesRepository.save(category);
             log.info("Changes made to the category with id \"{}\"", category.getId());
             return Optional.of(category);
         }
+        log.warn("Update category with id \"{}\" aborted", categoryDto.getId());
         return Optional.empty();
     }
 
