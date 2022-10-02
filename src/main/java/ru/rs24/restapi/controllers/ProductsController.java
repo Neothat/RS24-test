@@ -15,7 +15,6 @@ import ru.rs24.restapi.mappers.dtos.ProductDto;
 import ru.rs24.restapi.services.CategoriesService;
 import ru.rs24.restapi.services.ProductsService;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;

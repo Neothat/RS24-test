@@ -1,7 +1,6 @@
 package ru.rs24.restapi.controllers;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,16 +12,13 @@ import ru.rs24.restapi.exceptions.ResourceNotFoundException;
 import ru.rs24.restapi.mappers.CategoryMapper;
 import ru.rs24.restapi.mappers.dtos.CategoryDto;
 import ru.rs24.restapi.services.CategoriesService;
-import ru.rs24.restapi.services.ProductsService;
 
-import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/categories")
-@RequiredArgsConstructor
 public class CategoriesController {
 
     @Setter (onMethod = @__(@Autowired))

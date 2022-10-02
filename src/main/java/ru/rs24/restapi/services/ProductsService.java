@@ -12,6 +12,8 @@ public interface ProductsService {
 
     Optional<Product> getProductById(Long id);
 
+    List<Product> getProductsByCategory(Category category);
+
     Optional<Product> saveProduct(Product product);
 
     Optional<Product> updateProduct(ProductDto productDto);
