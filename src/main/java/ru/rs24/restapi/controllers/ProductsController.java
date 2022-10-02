@@ -31,8 +31,13 @@ public class ProductsController {
     private CategoriesService categoriesService;
 
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getAllProducts() {
-        return new ResponseEntity<>(getProductsService().getAllProducts().stream()
+    public ResponseEntity<List<ProductDto>> getAllProducts(
+            @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name = "name_part", required = false) String namePart,
+            @RequestParam(name = "min_price", required = false) Integer minPrice,
+            @RequestParam(name = "max_price", required = false) Integer maxPrice
+    ) {
+        return new ResponseEntity<>(getProductsService().getAllProducts(category, namePart, minPrice, maxPrice).stream()
                 .map(ProductMapper.INSTANCE::toDto)
                 .collect(Collectors.toList()), HttpStatus.OK);
     }

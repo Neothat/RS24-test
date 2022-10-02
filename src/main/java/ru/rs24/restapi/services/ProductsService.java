@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProductsService {
-    List<Product> getAllProducts();
+    List<Product> getAllProducts(String category, String namePart, Integer minPrice, Integer maxPrice);
 
     Optional<Product> getProductById(Long id);
 
