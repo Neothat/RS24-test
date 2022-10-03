@@ -38,6 +38,7 @@ public class ProductsController {
             @RequestParam(name = "max_price", required = false) Integer maxPrice
     ) {
         return new ResponseEntity<>(getProductsService().getAllProducts(category, namePart, minPrice, maxPrice).stream()
+                .filter(product -> product.getStatus().equals(Boolean.TRUE))
                 .map(ProductMapper.INSTANCE::toDto)
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
